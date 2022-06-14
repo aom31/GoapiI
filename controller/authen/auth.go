@@ -52,9 +52,23 @@ type LoginBody struct {
 }
 
 func Login(c *gin.Context) {
-	var json RegisterBody
+	var json LoginBody
 	if err := c.ShouldBindJSON(&json); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
+	}
+	//check user id is exist
+	// Get first matched record
+	var userExist orm.User
+	orm.Db.Where("username = ?", json.Username).First(&userExist)
+	if userExist.ID == 0 {
+		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "Username does not existed"})
+		return
+	}
+	err := bcrypt.CompareHashAndPassword([]byte(userExist.Password), []byte(json.Password))
+	if err == nil {
+		c.JSON(http.StatusOK, gin.H{"status": "ok", "message": "Login success"})
+	} else {
+		c.JSON(http.StatusOK, gin.H{"status": "error", "message": "Login failed!!"})
 	}
 }

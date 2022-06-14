@@ -31,6 +31,7 @@ func main() {
 
 	r := gin.Default()
 	r.POST("/register", AuthenController.Register)
+	r.POST("/login", AuthenController.Login)
 
 	r.Use(cors.Default())
 	r.Run()
